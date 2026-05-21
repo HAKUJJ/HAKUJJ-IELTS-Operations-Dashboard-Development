@@ -1,0 +1,165 @@
+import React, { useState } from 'react';
+import SafeIcon from '../common/SafeIcon';
+import { FiEye, FiMapPin, FiPrinter, FiPlay, FiUsers, FiClock, FiCalendar as FiCal, FiList } from 'react-icons/fi';
+import { mockSessions, mockCandidates } from '../data/mockData';
+
+const TestSessions = () => {
+  const [selectedSessionId, setSelectedSessionId] = useState(mockSessions[3].id);
+  const selectedSession = mockSessions.find(s => s.id === selectedSessionId);
+
+  const StatusBadge = ({ status }) => {
+    const styles = {
+      'Upcoming': 'bg-blue-50 text-blue-600 border-blue-200',
+      'Ongoing': 'bg-green-50 text-green-600 border-green-200',
+      'Completed': 'bg-slate-100 text-slate-600 border-slate-200',
+    };
+    return (
+      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${styles[status]}`}>
+        {status}
+      </span>
+    );
+  };
+
+  return (
+    <div className="p-8 space-y-6">
+      <div className="bg-white rounded-2xl shadow-soft border border-slate-100 overflow-hidden">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-slate-50 border-b border-slate-100 text-slate-500">
+            <tr>
+              <th className="px-6 py-4 font-medium">Session ID</th>
+              <th className="px-6 py-4 font-medium">Date <SafeIcon icon={FiList} className="inline ml-1" /></th>
+              <th className="px-6 py-4 font-medium">Venue / Room</th>
+              <th className="px-6 py-4 font-medium text-center">Registered Candidates</th>
+              <th className="px-6 py-4 font-medium">Status</th>
+              <th className="px-6 py-4 font-medium text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {mockSessions.map((session) => (
+              <tr 
+                key={session.id} 
+                className={`transition-colors cursor-pointer ${selectedSessionId === session.id ? 'bg-slate-50' : 'hover:bg-slate-50/50'}`}
+                onClick={() => setSelectedSessionId(session.id)}
+              >
+                <td className="px-6 py-4 font-medium text-slate-800">{session.id}</td>
+                <td className="px-6 py-4 text-slate-600 whitespace-pre-line">{session.date.replace(' ', '\n')}</td>
+                <td className="px-6 py-4 text-slate-600">
+                  <div className="font-medium text-slate-800">{session.venue}</div>
+                  <div className="text-xs">{session.room}</div>
+                </td>
+                <td className="px-6 py-4 text-center text-slate-600">{session.registered}</td>
+                <td className="px-6 py-4"><StatusBadge status={session.status} /></td>
+                <td className="px-6 py-4 text-right">
+                  <button className={`p-2 rounded-lg border ${selectedSessionId === session.id ? 'border-navy text-navy bg-navy/5' : 'border-slate-200 text-slate-400 hover:border-slate-300'}`}>
+                    <SafeIcon icon={FiEye} className="text-lg" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {selectedSession && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+             <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-800">Session Details: {selectedSession.id}</h3>
+                  <p className="text-sm text-slate-500 flex items-center mt-1"><SafeIcon icon={FiMapPin} className="mr-1"/> {selectedSession.venue}, {selectedSession.room}</p>
+                </div>
+                <div className="flex space-x-3">
+                  <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-50 flex items-center shadow-sm">
+                    <SafeIcon icon={FiPrinter} className="mr-2" /> Print Roster
+                  </button>
+                  <button className="px-6 py-2 bg-navy text-white rounded-xl text-sm font-medium hover:bg-navy-light flex items-center shadow-md">
+                    <SafeIcon icon={FiPlay} className="mr-2" /> Start Session
+                  </button>
+                </div>
+             </div>
+
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white p-6 rounded-2xl shadow-soft border border-slate-100">
+                  <h4 className="font-semibold text-slate-800 mb-4 border-b pb-2">Venue Information</h4>
+                  <div className="space-y-4">
+                    <div className="flex items-start">
+                      <SafeIcon icon={FiMapPin} className="text-slate-400 mt-1 mr-3 text-lg" />
+                      <div>
+                        <p className="text-xs text-slate-500 font-medium">Venue Name</p>
+                        <p className="text-sm text-slate-800">{selectedSession.venue}</p>
+                        <p className="text-xs text-slate-500 mt-1">{selectedSession.address}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <SafeIcon icon={FiUsers} className="text-slate-400 mt-1 mr-3 text-lg" />
+                      <div>
+                        <p className="text-xs text-slate-500 font-medium">Room & Capacity</p>
+                        <p className="text-sm text-slate-800">{selectedSession.room}</p>
+                        <p className="text-xs text-slate-500">{selectedSession.capacity} Candidates</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-2xl shadow-soft border border-slate-100">
+                  <h4 className="font-semibold text-slate-800 mb-4 border-b pb-2">Schedule</h4>
+                  <div className="space-y-4">
+                    <div className="flex items-start">
+                      <SafeIcon icon={FiCal} className="text-slate-400 mt-1 mr-3 text-lg" />
+                      <div>
+                        <p className="text-xs text-slate-500 font-medium">Test Date</p>
+                        <p className="text-sm text-slate-800">{selectedSession.date}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <SafeIcon icon={FiClock} className="text-slate-400 mt-1 mr-3 text-lg" />
+                      <div>
+                        <p className="text-xs text-slate-500 font-medium">Reporting & Test Time</p>
+                        <p className="text-sm text-slate-800">Reporting: {selectedSession.reportingTime}</p>
+                        <p className="text-sm text-slate-800 mt-1">Test: {selectedSession.testTime}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+             </div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-soft border border-slate-100 flex flex-col h-full">
+            <div className="p-5 border-b border-slate-100">
+              <h4 className="font-semibold text-slate-800">Assigned Candidates ({selectedSession.registered})</h4>
+            </div>
+            <div className="overflow-y-auto flex-1 p-0">
+               <table className="w-full text-left text-sm">
+                 <thead className="bg-slate-50 text-slate-500 text-xs">
+                   <tr>
+                     <th className="px-4 py-3 font-medium">#</th>
+                     <th className="px-4 py-3 font-medium">Candidate Name</th>
+                     <th className="px-4 py-3 font-medium">ID</th>
+                     <th className="px-4 py-3 font-medium">Status</th>
+                   </tr>
+                 </thead>
+                 <tbody className="divide-y divide-slate-50">
+                    {mockCandidates.slice(0, 5).map((c, i) => (
+                      <tr key={c.id} className="hover:bg-slate-50">
+                        <td className="px-4 py-3 text-slate-400">{i + 1}</td>
+                        <td className="px-4 py-3 font-medium text-slate-800">{c.name}</td>
+                        <td className="px-4 py-3 text-slate-500">{c.id}</td>
+                        <td className="px-4 py-3">
+                           <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">Registered</span>
+                        </td>
+                      </tr>
+                    ))}
+                 </tbody>
+               </table>
+            </div>
+            <div className="p-4 border-t border-slate-100 text-center">
+               <button className="text-sm text-navy hover:text-navy-light font-medium">View all {selectedSession.registered} candidates &gt;</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default TestSessions;

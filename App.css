@@ -1,0 +1,211 @@
+import React, { useState } from 'react';
+import SafeIcon from '../common/SafeIcon';
+import { FiSearch, FiFilter, FiCheck, FiX, FiMaximize2, FiCamera, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
+import { mockCandidates } from '../data/mockData';
+
+const Attendance = () => {
+  const [candidates, setCandidates] = useState(mockCandidates);
+  const [selectedCandidateId, setSelectedCandidateId] = useState(mockCandidates[0].id);
+  const [search, setSearch] = useState('');
+
+  const selectedCandidate = candidates.find(c => c.id === selectedCandidateId);
+
+  const filteredCandidates = candidates.filter(c => 
+    c.name.toLowerCase().includes(search.toLowerCase()) || 
+    c.id.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleConfirmAttendance = (status) => {
+    setCandidates(candidates.map(c => 
+      c.id === selectedCandidateId ? { ...c, status: status } : c
+    ));
+  };
+
+  const StatusBadge = ({ status }) => {
+    const styles = {
+      'Pending': 'bg-orange-50 text-orange-600 border-orange-200',
+      'Present': 'bg-green-50 text-green-600 border-green-200',
+      'Absent': 'bg-red-50 text-red-600 border-red-200',
+    };
+    return (
+      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${styles[status]}`}>
+        {status}
+      </span>
+    );
+  };
+
+  return (
+    <div className="p-8 h-[calc(100vh-80px)] flex space-x-6">
+      
+      {/* Left List */}
+      <div className="w-1/3 bg-white rounded-2xl shadow-soft border border-slate-100 flex flex-col h-full">
+        <div className="p-5 border-b border-slate-100 space-y-4">
+          <h3 className="font-semibold text-slate-800">Candidates ({candidates.length})</h3>
+          <div className="flex space-x-2">
+            <select className="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-navy focus:border-navy block w-full p-2.5">
+              <option>All Sessions</option>
+            </select>
+            <select className="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-navy focus:border-navy block w-full p-2.5">
+              <option>All Status</option>
+            </select>
+          </div>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <SafeIcon icon={FiSearch} className="text-slate-400" />
+            </div>
+            <input 
+              type="text" 
+              className="bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg focus:ring-navy focus:border-navy block w-full pl-10 p-2.5" 
+              placeholder="Search by name or ID..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <button className="absolute inset-y-0 right-0 flex items-center pr-3">
+               <SafeIcon icon={FiFilter} className="text-slate-400 hover:text-slate-600" />
+            </button>
+          </div>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-50 text-slate-500 sticky top-0">
+              <tr>
+                <th className="px-5 py-3 font-medium">Candidate</th>
+                <th className="px-5 py-3 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {filteredCandidates.map(c => (
+                <tr 
+                  key={c.id} 
+                  onClick={() => setSelectedCandidateId(c.id)}
+                  className={`cursor-pointer transition-colors ${selectedCandidateId === c.id ? 'bg-navy/5 border-l-4 border-l-navy' : 'hover:bg-slate-50 border-l-4 border-l-transparent'}`}
+                >
+                  <td className="px-5 py-4">
+                    <div className="font-medium text-slate-800">{c.name}</div>
+                    <div className="text-xs text-slate-500 mt-0.5">{c.idType} • {c.id}</div>
+                  </td>
+                  <td className="px-5 py-4 text-right">
+                    <StatusBadge status={c.status} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Right Detail */}
+      {selectedCandidate && (
+        <div className="flex-1 bg-white rounded-2xl shadow-soft border border-slate-100 flex flex-col h-full overflow-hidden">
+          <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div>
+              <h2 className="text-xl font-bold text-slate-800">Verify Candidate: {selectedCandidate.name}</h2>
+              <p className="text-sm text-slate-500 mt-1">{selectedCandidate.date} • Birmingham Center, Room 301</p>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6 space-y-8">
+             <div className="grid grid-cols-2 gap-8">
+               {/* ID Doc */}
+               <div className="space-y-3">
+                 <div className="flex justify-between items-center">
+                   <h4 className="font-semibold text-slate-800">Uploaded ID Document</h4>
+                   <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">Passport</span>
+                 </div>
+                 <div className="border border-slate-200 rounded-xl overflow-hidden relative group bg-slate-100 aspect-[4/3] flex items-center justify-center">
+                   <img src={selectedCandidate.idDoc} alt="ID Document" className="w-full h-full object-cover opacity-80" />
+                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                     <button className="bg-white text-slate-800 px-4 py-2 rounded-lg text-sm font-medium flex items-center shadow-lg">
+                       <SafeIcon icon={FiMaximize2} className="mr-2" /> View Full Size
+                     </button>
+                   </div>
+                 </div>
+               </div>
+
+               {/* Live Photo */}
+               <div className="space-y-3">
+                 <div className="flex justify-between items-center">
+                   <h4 className="font-semibold text-slate-800">Live Test Day Photo</h4>
+                   <span className="text-xs text-slate-500">Captured 09:12 AM</span>
+                 </div>
+                 <div className="border border-slate-200 rounded-xl overflow-hidden relative bg-slate-100 aspect-[4/3]">
+                   <img src={selectedCandidate.photo} alt="Live Photo" className="w-full h-full object-cover" />
+                 </div>
+                 <button className="w-full py-2 border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50 flex items-center justify-center">
+                    <SafeIcon icon={FiCamera} className="mr-2" /> Retake Photo
+                 </button>
+               </div>
+             </div>
+
+             <div className="grid grid-cols-2 gap-8">
+                <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
+                  <h4 className="font-semibold text-slate-800 mb-4">Verification Checklist</h4>
+                  <div className="space-y-3">
+                    <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-green-400">
+                      <div className="flex items-center text-sm font-medium text-slate-700">
+                        <SafeIcon icon={FiCheckCircle} className="text-green-500 mr-2 text-lg" />
+                        Name matches ID document
+                      </div>
+                      <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">Match v</span>
+                    </label>
+                    <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-green-400">
+                      <div className="flex items-center text-sm font-medium text-slate-700">
+                        <SafeIcon icon={FiCheckCircle} className="text-green-500 mr-2 text-lg" />
+                        Face matches ID document
+                      </div>
+                      <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">Match v</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 rounded-xl p-5 border border-slate-100 flex flex-col justify-center">
+                   <h4 className="font-semibold text-slate-800 mb-2">Attendance Status</h4>
+                   <p className="text-sm text-slate-500 mb-4">Mark the candidate's attendance for this session.</p>
+                   
+                   <div className="flex space-x-3 mb-4">
+                     <button 
+                        onClick={() => handleConfirmAttendance('Present')}
+                        className={`flex-1 py-2.5 rounded-lg border font-medium text-sm flex items-center justify-center transition-colors
+                        ${selectedCandidate.status === 'Present' ? 'bg-green-50 border-green-500 text-green-700' : 'bg-white border-slate-200 text-slate-600 hover:border-green-400'}`}
+                     >
+                       <SafeIcon icon={FiCheck} className="mr-2" /> Mark as Present
+                     </button>
+                     <button 
+                        onClick={() => handleConfirmAttendance('Absent')}
+                        className={`flex-1 py-2.5 rounded-lg border font-medium text-sm flex items-center justify-center transition-colors
+                        ${selectedCandidate.status === 'Absent' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-slate-200 text-slate-600 hover:border-red-400'}`}
+                     >
+                       <SafeIcon icon={FiX} className="mr-2" /> Mark as Absent
+                     </button>
+                   </div>
+                   <div className="text-sm text-slate-600">
+                     Current Status: <span className="font-semibold ml-1"><StatusBadge status={selectedCandidate.status} /></span>
+                   </div>
+                </div>
+             </div>
+          </div>
+
+          <div className="p-5 border-t border-slate-100 bg-slate-50 flex justify-between items-center">
+            <button className="px-6 py-2.5 border border-red-200 text-red-600 bg-white rounded-xl text-sm font-medium hover:bg-red-50 flex items-center">
+              <SafeIcon icon={FiAlertCircle} className="mr-2" /> Reject ID
+            </button>
+            <div className="flex space-x-3">
+              <button className="px-6 py-2.5 border border-slate-200 text-slate-600 bg-white rounded-xl text-sm font-medium hover:bg-slate-50">
+                Cancel
+              </button>
+              <button 
+                onClick={() => handleConfirmAttendance('Present')}
+                className="px-8 py-2.5 bg-crimson text-white rounded-xl text-sm font-medium hover:bg-crimson-dark shadow-md flex items-center"
+              >
+                <SafeIcon icon={FiCheck} className="mr-2" /> Confirm Attendance
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Attendance;
